@@ -7,3 +7,5 @@
 /spec/reports/
 /tmp/
 /.devcontainer/
+.idea/
+rqrcode_core.iml
