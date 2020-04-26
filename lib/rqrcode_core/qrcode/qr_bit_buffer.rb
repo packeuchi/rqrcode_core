@@ -52,6 +52,15 @@ module RQRCodeCore
 
     end
 
+    def byte_with_connected_encoding_start(length, page_number, last_page_number, parity)
+      put(QRMODE[:mode_byte_connected], 4)
+      put(page_number, 4)
+      put(last_page_number, 4)
+      put(parity, 8)
+      put(QRMODE[:mode_8bit_byte], 4)
+      put(length, QRUtil.get_length_in_bits(QRMODE[:mode_8bit_byte], @version))
+    end
+
     def alphanumeric_encoding_start(length)
 
       put( QRMODE[:mode_alpha_numk], 4 )

@@ -5,12 +5,14 @@ module RQRCodeCore
     :mode_number        => 1 << 0,
     :mode_alpha_numk    => 1 << 1,
     :mode_8bit_byte     => 1 << 2,
+    :mode_byte_connected => 3,
   }
 
   QRMODE_NAME = {
     :number        => :mode_number,
     :alphanumeric  => :mode_alpha_numk,
-    :byte_8bit     => :mode_8bit_byte
+    :byte_8bit     => :mode_8bit_byte,
+    :byte_connected => :mode_byte_connected,
   }
 
   QRERRORCORRECTLEVEL = {
@@ -160,11 +162,15 @@ module RQRCodeCore
     #      * Level :m 15% of code can be restored
     #      * Level :q 25% of code can be restored
     #      * Level :h 30% of code can be restored (default :h)
+    #   # page_number      - (for connected QRCode) number of page (0-15)
+    #   # last_page_number - (for connected QRCode) number of last page (0-15)
+    #   # parity           - (for connected QRCode) parity of whole data
     #   # mode   - the mode of the qrcode (defaults to alphanumeric or byte_8bit, depending on the input data):
     #      * :number
     #      * :alphanumeric
     #      * :byte_8bit
     #      * :kanji
+    #      * :byte_connected - byte_8bit with connected QRCode
     #
     #   qr = RQRCodeCore::QRCode.new('hello world', size: 1, level: :m, mode: :alphanumeric)
     #
@@ -183,7 +189,7 @@ module RQRCodeCore
 
       @data                 = string
 
-      mode                  = QRMODE_NAME[(options[:mode] || '').to_sym]
+      mode = QRMODE_NAME[(options[:mode] || '').to_sym]
       # If mode is not explicitely given choose mode according to data type
       mode ||= case
         when RQRCodeCore::QRNumeric.valid_data?(@data)
@@ -194,7 +200,8 @@ module RQRCodeCore
           QRMODE_NAME[:byte_8bit]
       end
 
-      max_size_array        = QRMAXDIGITS[level][mode]
+      byte_mode = mode == :mode_byte_connected ? :mode_8bit_byte : mode
+      max_size_array        = QRMAXDIGITS[level][byte_mode]
       size                  = options[:size] || smallest_size_for(string, max_size_array)
 
       if size > QRUtil.max_size
@@ -211,6 +218,11 @@ module RQRCodeCore
           QRNumeric.new( @data )
         when :mode_alpha_numk
           QRAlphanumeric.new( @data )
+        when :mode_byte_connected
+          page_number = options[:page_number]
+          last_page_number = options[:last_page_number]
+          parity = options[:parity]
+          QR8bitByteWithConnected.new(@data, page_number, last_page_number, parity)
         else
           QR8bitByte.new( @data )
         end

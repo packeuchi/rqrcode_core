@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rqrcode_core/qrcode/qr_8bit_byte'
+require 'rqrcode_core/qrcode/qr_8bit_byte_with_connected'
 require 'rqrcode_core/qrcode/qr_alphanumeric'
 require 'rqrcode_core/qrcode/qr_bit_buffer'
 require 'rqrcode_core/qrcode/qr_code'
